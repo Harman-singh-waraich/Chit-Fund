@@ -93,6 +93,7 @@ contract ChitFund{
           require(block.timestamp.sub(cycleStarts[counter]) >= cyclePeriod, "month has not ended yet! Be patient");
         }
         address payable _winner = pickWinner();
+        _winner.transfer(address(this).balance.sub(0.0009 ether));
 
         duesPaid = 0;
         counter += 1;
@@ -104,7 +105,9 @@ contract ChitFund{
               scheduleLottery();
             }
         emit PaidWinner(_winner);
-        _winner.transfer(address(this).balance.sub(0.0009 ether));
+        if(counter > subscribers.length){
+          close();
+        }
     }
 
     function pickWinner() private returns(address payable){
@@ -148,5 +151,8 @@ contract ChitFund{
         uint callCost = 300000*1e9 + aion.serviceFee();
         aion.ScheduleCall.value(callCost)( block.timestamp + 10 minutes, address(this), 0, 300000, 1e9, data, true);
     }
-
+    
+    function close() private {
+      selfdestruct(Organiser);
+    }
 }
