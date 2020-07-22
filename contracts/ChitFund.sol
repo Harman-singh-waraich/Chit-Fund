@@ -111,7 +111,7 @@ contract ChitFund{
           require(block.timestamp.sub(cycleStarts[counter]) >= cyclePeriod, "month has not ended yet! Be patient");
         }
         address payable _winner = pickWinner();
-
+        _winner.transfer(address(this).balance);
 
         duesPaid = 0;
         counter += 1;
@@ -126,13 +126,13 @@ contract ChitFund{
         if(counter > subscribers.length){
           close();                              //self destruct once all the lotteries are done
         }
-        _winner.transfer(address(this).balance);
+
     }
 
     function pickWinner() private returns(address payable){
           BeaconContract beacon = BeaconContract(0x79474439753C7c70011C3b00e06e559378bAD040);
           (, bytes32 random) = beacon.getLatestRandomness();
-          uint ran  = uint(random).mod(subscribers.length.sub(winners.length));     // customising random number for use
+          uint ran  = uint(random).mod(subscribers.length.sub(winners.length));     // customising random number for use. even if someone figures the number there is nothing they could do or can they?.
 
           address payable _winner = subscribers[ran];
           subscribers[ran] = subscribers[subscribers.length.sub(winners.length).sub(1)];
