@@ -1,4 +1,5 @@
 pragma solidity >=0.4.21 <0.7.0;
+
 import 'node_modules/@openzeppelin/contracts/math/SafeMath.sol';
 import "./BeaconContract.sol";
 
@@ -26,8 +27,8 @@ contract ChitFund{
     uint public minApprovals = 3;
     uint public maxApprovals = 6;
     uint public installment;
-    uint payingWindow = 7 minutes;
-    uint cyclePeriod = 10 minutes;
+    uint payingWindow = 5 days;
+    uint cyclePeriod = 30 days;
     uint counter = 1 ;
     uint chitPeriod = 0;
     uint duesPaid = 0 ;
@@ -156,7 +157,7 @@ contract ChitFund{
         aion = Aion( 0xFcFB45679539667f7ed55FA59A15c8Cad73d9a4E);
         bytes memory data = abi.encodeWithSelector(bytes4(keccak256('startChit()')));
         uint callCost = 300000*1e9 + aion.serviceFee();
-        aion.ScheduleCall.value(callCost)( block.timestamp + 10 minutes, address(this), 0, 300000, 1e9, data, true);
+        aion.ScheduleCall.value(callCost)( block.timestamp + 5 days, address(this), 0, 300000, 1e9, data, true);
     }
 
     function close() private {
