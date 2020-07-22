@@ -26,8 +26,8 @@ contract ChitFund{
     uint public minApprovals = 3;
     uint public maxApprovals = 6;
     uint public installment;
-    uint payingWindow = 3 minutes;
-    uint cyclePeriod = 5 minutes;
+    uint payingWindow = 7 minutes;
+    uint cyclePeriod = 10 minutes;
     uint counter = 1 ;
     uint chitPeriod = 0;
     uint duesPaid = 0 ;
@@ -72,10 +72,12 @@ contract ChitFund{
 
 
     function depositMonthlyDue(uint amount) public payable {
-        require(block.timestamp.sub(cycleStarts[counter]) <= payingWindow , "paying window is closed");
+        require(isMember[msg.sender] == true,"you are not a member");
+        require(!isOpen,"Approval process underway");
+        require( chitPeriod.sub(block.timestamp) <= payingWindow , "paying window is not open yet");
 
         if(counter != 1){
-             require(block.timestamp.sub(cycleStarts[counter]) >= cyclePeriod ,"paying window is not open yet");
+             require(block.timestamp.sub(cycleStarts[counter]) >= cyclePeriod);
           }
         require(duePaid[msg.sender] == false , "Due already paid");
         require(amount == msg.value);
@@ -87,13 +89,27 @@ contract ChitFund{
         emit DuePaid(msg.sender,msg.value);
     }
 
+    function startChit() public {
+          require(isOpen,"one time function");
+          require(block.timestamp >= startDate + 4 days + 30 minutes , "nows not the time");
+          isOpen = false;
+          if(approvals < minApprovals){
+             uint refund = address(this).balance.div(subscribers.length);
+             for(uint i = 0 ;i < subscribers.length; i++){
+                   subscribers[i].transfer(refund);
+                 }
+            }else{
+               initializeChit();
+            }
+      }
+
     function payWinner() public {
         if(!firstLottery){
           require(duesPaid == subscribers.length, "some installments are pending");
           require(block.timestamp.sub(cycleStarts[counter]) >= cyclePeriod, "month has not ended yet! Be patient");
         }
         address payable _winner = pickWinner();
-        _winner.transfer(address(this).balance.sub(0.0009 ether));
+
 
         duesPaid = 0;
         counter += 1;
@@ -108,6 +124,7 @@ contract ChitFund{
         if(counter > subscribers.length){
           close();
         }
+        _winner.transfer(address(this).balance);
     }
 
     function pickWinner() private returns(address payable){
@@ -125,18 +142,7 @@ contract ChitFund{
           return _winner;
     }
 
-    function startChit() public {
-          /* require(block.timestamp >= startDate + 5 days , "nows not the time"); */
-          isOpen = false;
-          if(approvals < minApprovals){
-             uint refund = address(this).balance.div(subscribers.length);
-             for(uint i = 0 ;i < subscribers.length; i++){
-                   subscribers[i].transfer(refund);
-                 }
-            }else{
-               initializeChit();
-            }
-      }
+
 
     function scheduleLottery() private {
         aion = Aion( 0xFcFB45679539667f7ed55FA59A15c8Cad73d9a4E);
@@ -151,7 +157,7 @@ contract ChitFund{
         uint callCost = 300000*1e9 + aion.serviceFee();
         aion.ScheduleCall.value(callCost)( block.timestamp + 10 minutes, address(this), 0, 300000, 1e9, data, true);
     }
-    
+
     function close() private {
       selfdestruct(Organiser);
     }
