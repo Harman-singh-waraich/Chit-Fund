@@ -94,10 +94,11 @@ contract ChitFund{
           require(block.timestamp >= startDate + 4 days + 30 minutes , "nows not the time");
           isOpen = false;
           if(approvals < minApprovals){
-             uint refund = address(this).balance.div(subscribers.length);
+             uint refund = address(this).balance.div(subscribers.length);     //refund in case of low approvels
              for(uint i = 0 ;i < subscribers.length; i++){
                    subscribers[i].transfer(refund);
                  }
+             close();
             }else{
                initializeChit();
             }
@@ -122,7 +123,7 @@ contract ChitFund{
             }
         emit PaidWinner(_winner);
         if(counter > subscribers.length){
-          close();
+          close();                              //self destruct once all the lotteries are done
         }
         _winner.transfer(address(this).balance);
     }
@@ -130,7 +131,7 @@ contract ChitFund{
     function pickWinner() private returns(address payable){
           BeaconContract beacon = BeaconContract(0x79474439753C7c70011C3b00e06e559378bAD040);
           (, bytes32 random) = beacon.getLatestRandomness();
-          uint ran  = uint(random).mod(subscribers.length.sub(winners.length));
+          uint ran  = uint(random).mod(subscribers.length.sub(winners.length));     // customising random number for use
 
           address payable _winner = subscribers[ran];
           subscribers[ran] = subscribers[subscribers.length.sub(winners.length).sub(1)];
@@ -159,6 +160,6 @@ contract ChitFund{
     }
 
     function close() private {
-      selfdestruct(Organiser);
+      selfdestruct(Organiser);   // the left off money goes to the organiser
     }
 }
