@@ -25,7 +25,7 @@ contract Organiser{
         require(_installment == msg.value, "please supply correct installment");
         ChitFund chit = new ChitFund(msg.sender,block.timestamp,_installment);
         address(chit).transfer(msg.value);
-        chit.scheduleStarting();
+        chit.scheduleStarting();  // chit starts 5 days after creation if minimum approvals have reached
 
         chits.push(address(chit));
         Chits[address(chit)] = Chit(msg.sender,_installment,block.timestamp);
