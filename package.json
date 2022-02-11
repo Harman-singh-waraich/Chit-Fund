@@ -9,7 +9,7 @@
     "mocha": "^8.0.1"
   },
   "devDependencies": {
-    "@openzeppelin/contracts": "^3.1.0",
+    "@openzeppelin/contracts": "^4.4.2",
     "@truffle/hdwallet-provider": "^1.0.38",
     "dotenv": "^8.2.0",
     "truffle": "^5.1.14"
