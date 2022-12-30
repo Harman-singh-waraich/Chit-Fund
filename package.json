@@ -6,7 +6,7 @@
   "author": "Harmeet Singh",
   "dependencies": {
     "chai": "^4.2.0",
-    "mocha": "^8.0.1"
+    "mocha": "^8.4.0"
   },
   "devDependencies": {
     "@openzeppelin/contracts": "^3.1.0",
